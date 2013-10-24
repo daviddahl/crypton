@@ -213,6 +213,32 @@ Session.prototype.getPeer = function (username, callback) {
 };
 
 /**!
+ * ### getSignalingAuthToken(username, serviceID, callback)
+ * Get the JWT from the server for use with vLine
+ *
+ * Calls back with peer and without error if successful
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {String} username
+ * @param {Function} callback
+ */
+Session.prototype.getSignalingAuthToken = function (username, callback) {
+  var that = this;
+  var url = crypton.url() + '/signaling-token/' + username;
+  superagent.get(url).set('x-session-identifier', that.id)
+    .end(function (res) {
+    if (!res.body || res.body.success !== true) {
+      callback(res.body.error);
+      return;
+    }
+    // Success
+    var signalingObj = res.body.signalingObj;
+    callback(null, signalingObj);
+  });
+};
+
+/**!
  * ### on(eventName, listener)
  * Set `listener` to be called anytime `eventName` is emitted
  *
@@ -237,4 +263,3 @@ Session.prototype.emit = function (eventName, data) {
 };
 
 })();
-

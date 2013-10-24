@@ -22,6 +22,7 @@ var app = process.app;
 var db = app.datastore;
 var middleware = require('../lib/middleware');
 var Account = require('../lib/account');
+var jwt = require('../lib/jwt');
 
 /**!
  * ### POST /account
@@ -157,3 +158,23 @@ app.post('/account/:username/keyring',
     });
   }
 );
+
+/**!
+ * ### GET /soignaling-token/:username
+ * Retrieve signaling token for user
+*/
+app.get('/signaling-token/:username',
+        middleware.verifySession, function (req, res) {
+  app.log('debug', 'handling GET /signaling-token/:username');
+
+  var token = jwt.createToken(req.params.username);
+  var signalingObj = {
+    username: req.params.username,
+    AUTH_TOKEN: token
+  };
+
+  res.send({
+    success: true,
+    signalingObj: signalingObj
+  });
+});
