@@ -48,6 +48,7 @@ CREATE TABLE account (
     account_id int8 not null primary key default nextval('version_identifier'),
     creation_time timestamp not null default current_timestamp,
     username text unique not null,
+    sha256_username text unique not null,
     base_keyring_id int8,
     deletion_time timestamp
 );

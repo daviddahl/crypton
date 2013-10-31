@@ -160,21 +160,52 @@ app.post('/account/:username/keyring',
 );
 
 /**!
- * ### GET /soignaling-token/:username
+ * ### GET /signaling-token/:username/:username_hash
  * Retrieve signaling token for user
 */
-app.get('/signaling-token/:username',
+app.get('/signaling-token/:username/:username_hash',
         middleware.verifySession, function (req, res) {
-  app.log('debug', 'handling GET /signaling-token/:username');
+  app.log('debug', 'handling GET /signaling-token/:username/:username_hash');
 
-  var token = jwt.createToken(req.params.username);
+  var token = jwt.createToken(req.params.username_hash);
   var signalingObj = {
     username: req.params.username,
-    AUTH_TOKEN: token
+    AUTH_TOKEN: token,
+    username_hash: req.params.username_hash
   };
 
   res.send({
     success: true,
     signalingObj: signalingObj
   });
+});
+
+/**!
+ * ### GET /username-from-hash/:username_hash
+ * Retrieve username from hash
+*/
+app.get('/username-from-hash/:username_hash',
+        middleware.verifySession, function (req, res) {
+  app.log('debug', 'handling GET /username-from-hash/:username_hash');
+
+  var account = new Account();
+
+  account.getByHash(req.params.username_hash, function (err) {
+    if (err) {
+      app.log('debug', 'could not get account for ' + req.params.username_hash);
+      res.send({
+        success: false,
+        error: err
+      });
+
+      return;
+    }
+
+    res.send({
+      success: true,
+      username: account.username,
+      hash: account.sha256Username
+    });
+  });
+
 });

@@ -38,7 +38,7 @@ var Account = module.exports = function Account () {};
  * Adds data to account object and calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {String} username
  * @param {Function} callback
  */
@@ -65,7 +65,7 @@ Account.prototype.get = function (username, callback) {
  * Adds data to account object and calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Number} id
  * @param {Function} callback
  */
@@ -86,13 +86,39 @@ Account.prototype.getById = function (id, callback) {
 };
 
 /**!
+ * ### getByHash(hash, callback)
+ * Retrieve a user account from the database using the specified `hash` of the username
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {string} hash
+ * @param {Function} callback
+ */
+Account.prototype.getByHash = function (hash, callback) {
+  app.log('debug', 'getting account for hash: ' + hash);
+
+  var that = this;
+
+  db.getAccountBySha256Username(hash, function (err, account) {
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    that.update(account);
+    callback(null);
+  });
+};
+
+
+/**!
  * ### hashChallengeKey(challengeKey, callback)
  * Hash an encoded version of the supplied `challengeKey` and store it in the parent account object
  *
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {String} challengeKey
  * @param {Function} callback
  */
@@ -140,7 +166,7 @@ Account.prototype.hashChallengeKey = function (challengeKey, callback) {
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {String} challengeKeyResponse
  * @param {Function} callback
  */
@@ -164,7 +190,7 @@ Account.prototype.verifyChallenge = function (challengeKeyResponse, callback) {
 /**!
  * ### update(key, value)
  * Update one or a set of keys in the parent account object
- * 
+ *
  * @param {String} key
  * @param {Object} value
  *
@@ -190,7 +216,7 @@ Account.prototype.update = function () {
 /**!
  * ### toJSON()
  * Dump non-function values of account object into an object
- * 
+ *
  * @return {Object} account
  */
 Account.prototype.toJSON = function () {
@@ -212,7 +238,7 @@ Account.prototype.toJSON = function () {
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Function} callback
  */
 Account.prototype.save = function (callback) {
@@ -227,7 +253,7 @@ Account.prototype.save = function (callback) {
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Number} from
  * @param {Object} headers
  * @param {Object} body
@@ -276,4 +302,3 @@ Account.prototype.sendMessage = function (from, headers, body, callback) {
     callback(null, messageId);
   });
 };
-

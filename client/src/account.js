@@ -36,7 +36,7 @@ var Account = crypton.Account = function Account () {};
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Function} callback
  */
 Account.prototype.save = function (callback) {
@@ -59,7 +59,7 @@ Account.prototype.save = function (callback) {
  * Calls back without error if successful
  *
  * __Throws__ if unsuccessful
- * 
+ *
  * @param {Function} callback
  */
 Account.prototype.unravel = function (callback) {
@@ -88,7 +88,7 @@ Account.prototype.unravel = function (callback) {
 /**!
  * ### serialize()
  * Pakcage and return a JSON representation of the current account
- * 
+ *
  * @return {Object}
  */
 // TODO rename to toJSON
@@ -103,9 +103,9 @@ Account.prototype.serialize = function () {
     challengeKeySalt: this.challengeKeySalt,
     keypairSalt: this.keypairSalt,
     symKeyCiphertext: this.symKeyCiphertext,
-    username: this.username
+    username: this.username,
+    sha256Username: this.sha256Username
   };
 };
 
 })();
-

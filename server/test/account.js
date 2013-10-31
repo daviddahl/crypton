@@ -26,6 +26,7 @@ describe('Account model', function () {
 
       var requestedAccount = {
         username: 'pizza',
+        sha256Username: 'FAKEHASHDATA',
         keypairSalt: '[1,2,3]',
         keypairCiphertext: { keypair: 'ciphertext' },
         pubKey: { pub: 'key' },
@@ -59,6 +60,7 @@ describe('Account model', function () {
       var account = new Account();
       var expectedProperties = [
         'username',
+        'sha256Username',
         'accountId',
         'keyringId',
         'keypairSalt',
@@ -182,4 +184,3 @@ describe('Account model', function () {
     });
   });
 });
-

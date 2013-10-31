@@ -225,7 +225,13 @@ Session.prototype.getPeer = function (username, callback) {
  */
 Session.prototype.getSignalingAuthToken = function (username, callback) {
   var that = this;
-  var url = crypton.url() + '/signaling-token/' + username;
+  // hash the username so we don't reveal it to signaling service:
+  var bitArray = sjcl.hash.sha256.hash(username);
+  var username_sha256 = sjcl.codec.hex.fromBits(bitArray);
+
+  var url = crypton.url() + '/signaling-token/' +
+    username + "/" +
+    username_sha256;
   superagent.get(url).set('x-session-identifier', that.id)
     .end(function (res) {
     if (!res.body || res.body.success !== true) {
@@ -235,6 +241,33 @@ Session.prototype.getSignalingAuthToken = function (username, callback) {
     // Success
     var signalingObj = res.body.signalingObj;
     callback(null, signalingObj);
+  });
+};
+
+/**!
+ * ### getUsernameFromHash(hash, callback)
+ * Get the username from a sha256 hash of the username
+ *
+ * Calls back with hash and without error if successful
+ *
+ * Calls back with error if unsuccessful
+ *
+ * @param {String} hash
+ * @param {Function} callback
+ */
+Session.prototype.getUsernameFromHash = function (hash, callback) {
+  var that = this;
+
+  var url = crypton.url() + '/username-from-hash/' + hash;
+  superagent.get(url).set('x-session-identifier', that.id)
+    .end(function (res) {
+    if (!res.body || res.body.success !== true) {
+      callback(res.body.error);
+      return;
+    }
+    // Success
+    var hashObj = res.body;
+    callback(null, hashObj);
   });
 };
 

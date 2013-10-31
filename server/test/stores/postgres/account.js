@@ -26,6 +26,7 @@ describe('Postgres driver', function () {
   describe('Account', function () {
     var newAccount = {
       username: 'testuser',
+      sha256Username: 'FAKEHASHDATA',
       keypairCiphertext: { "keypair": "ciphertext" },
       keypairSalt: '[1,2,3]',
       pubKey: { "pubkey": "ciphertext" },
@@ -38,6 +39,7 @@ describe('Postgres driver', function () {
 
     var expectedAccount = {
       username: 'testuser',
+      sha256Username: 'FAKEHASHDATA',
       accountId: 4,
       keyringId: 5,
       keypairSalt: [ 1, 2, 3 ],

@@ -51,7 +51,7 @@ crypton.cipherOptions = {
 /**!
  * ### url()
  * Generate URLs for server calls
- * 
+ *
  * @return {String} url
  */
 crypton.url = function () {
@@ -61,7 +61,7 @@ crypton.url = function () {
 /**!
  * ### randomBytes()
  * Generate `nbytes` bytes of random data
- * 
+ *
  * @param {Number} nbytes
  */
 function randomBytes (nbytes) {
@@ -78,7 +78,7 @@ crypton.randomBytes = randomBytes;
  * Calls back with account and without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {String} username
  * @param {String} passphrase
  * @param {Function} callback
@@ -108,6 +108,8 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
   account.hmacKeyCiphertext = sjcl.encrypt(symkey.key, JSON.stringify(hmacKey), crypton.cipherOptions);
   account.pubKey = JSON.stringify(keypair.pub.serialize());
   account.symKeyCiphertext = JSON.stringify(symkey.tag);
+  var bitArray = sjcl.hash.sha256.hash(username);
+  account.sha256Username = sjcl.codec.hex.fromBits(bitArray);
 
   if (save) {
     account.save(function (err) {
@@ -127,7 +129,7 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
  * Calls back with session and without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {String} username
  * @param {String} passphrase
  * @param {Function} callback
@@ -170,4 +172,3 @@ crypton.authorize = function (username, passphrase, callback) {
 };
 
 })();
-

@@ -28,6 +28,7 @@ describe('Account', function () {
   account.containerNameHmacKeyCiphertext = {"iv":"+DGWzgQLX5JrDn3YnQin4g","v":1,"iter":1000,"ks":128,"ts":64,"mode":"gcm","adata":"","cipher":"aes","ct":"Sz6fxXyupBBSxwVA5a4DE0c6iRJjQMJWM8aoAkvO5YdkiNAP9IdUZw2uj4qhtL6hBTvtOfbyRTizoHWxWW9A44WUr0kV+DcPyvFJrSy6gzALn5DsgflGF3yreQsGNGvI"};
   account.hmacKeyCiphertext = {"iv":"scJ0FirBeCraOTIp2v+WDg","v":1,"iter":1000,"ks":128,"ts":64,"mode":"gcm","adata":"","cipher":"aes","ct":"N+OCBvmA9Go8zp7M5kxeaSNnd5CYey/F/Bzh7x5mHjUXbX4+0MDSWmsb8b3QbJ3rZcgb5xBfimeMNOkXwKJdZD4qS2fAeOF+EleIHG9J0OWKnXE2fZi00cTbqQrl5A1lTQ"};
   account.username = 'user';
+  account.sha256Username = "FAKEHASHDATA";
   account.challengeKey = 'hold';
   account.challengeKeySalt = 'hold';
 
@@ -67,7 +68,8 @@ describe('Account', function () {
         'challengeKeySalt',
         'keypairSalt',
         'symKeyCiphertext',
-        'username'
+        'username',
+        'sha256Username'
       ];
       var serialized = account.serialize();
       assert.deepEqual(Object.keys(serialized), expected);
@@ -87,6 +89,7 @@ describe('Account', function () {
       assert.deepEqual(ret.keypairSalt, account.keypairSalt);
       assert.deepEqual(ret.symkeyCiphertext, account.symkeyCiphertext);
       assert.deepEqual(ret.username, account.username);
+      assert.deepEqual(ret.sha256Username, account.sha256Username);
     });
   });
 });

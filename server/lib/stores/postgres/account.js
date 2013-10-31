@@ -35,6 +35,7 @@ var connect = require('./').connect;
 exports.saveAccount = function saveAccount(account, callback) {
   var requiredFields = [
     'username',
+    'sha256Username',
     'keypairCiphertext',
     'keypairSalt',
     'pubKey',
@@ -57,11 +58,12 @@ exports.saveAccount = function saveAccount(account, callback) {
 
     var accountQuery = {
       text:
-        "insert into account (username, base_keyring_id) " +
-        "values ($1, nextval('version_identifier')) " +
+        "insert into account (username, sha256_username, base_keyring_id) " +
+        "values ($1, $2, nextval('version_identifier')) " +
         "returning account_id, base_keyring_id",
       values: [
-        account.username
+        account.username,
+        account.sha256Username
       ]
     };
 
@@ -142,6 +144,7 @@ exports.getAccount = function getAccount(username, callback) {
     var accountQuery = {
       text:
         "select username, " +
+        "sha256_username, " +
         "account.account_id, base_keyring_id, " +
         "challenge_key_hash, challenge_key_salt, " +
         "keypair, keypair_salt, " +
@@ -169,6 +172,7 @@ exports.getAccount = function getAccount(username, callback) {
 
       callback(null, {
         username: result.rows[0].username,
+        sha256Username: result.rows[0].sha256_username,
         accountId: result.rows[0].account_id,
         keyringId: result.rows[0].base_keyring_id,
         keypairSalt: JSON.parse(result.rows[0].keypair_salt.toString()),
@@ -183,6 +187,55 @@ exports.getAccount = function getAccount(username, callback) {
     });
   });
 };
+
+exports.getAccountBySha256Username =
+function getAccountBySha256Username(sha256Hash, callback) {
+  connect(function (client, done) {
+    var accountQuery = {
+      text:
+        "select account.account_id, " +
+        "account.username, account.sha256_username, base_keyring_id, " +
+        "challenge_key_hash, challenge_key_salt, " +
+        "keypair, keypair_salt, " +
+        "pubkey, symkey, " +
+        "container_name_hmac_key, hmac_key " +
+        "from account left join base_keyring using (base_keyring_id) " +
+        "where account.sha256_username=$1",
+      values: [
+        sha256Hash
+      ]
+    };
+
+    client.query(accountQuery, function (err, result) {
+      done();
+
+      if (err) {
+        console.log('Unhandled database error: ' + err);
+        callback('Database error.');
+        return;
+      }
+      if (!result.rows.length) {
+        callback('Account not found.');
+        return;
+      }
+
+      callback(null, {
+        username: result.rows[0].username,
+        sha256Username: result.rows[0].sha256_username,
+        accountId: result.rows[0].account_id,
+        keyringId: result.rows[0].base_keyring_id,
+        keypairSalt: JSON.parse(result.rows[0].keypair_salt.toString()),
+        keypairCiphertext: JSON.parse(result.rows[0].keypair.toString()),
+        pubKey: JSON.parse(result.rows[0].pubkey.toString()),
+        symKeyCiphertext: JSON.parse(result.rows[0].symkey.toString()),
+        challengeKeySalt: JSON.parse(result.rows[0].challenge_key_salt.toString()),
+        challengeKeyHash: result.rows[0].challenge_key_hash.toString(),
+        containerNameHmacKeyCiphertext: JSON.parse(result.rows[0].container_name_hmac_key.toString()),
+        hmacKeyCiphertext: JSON.parse(result.rows[0].hmac_key.toString())
+      });
+    });
+  });
+}
 
 /**!
  * ### getAccountById(accountId, callback)
@@ -200,7 +253,7 @@ exports.getAccountById = function getAccountById(accountId, callback) {
     var accountQuery = {
       text:
         "select account.account_id, " +
-        "account.username, base_keyring_id, " +
+        "account.username, account.sha256_username, base_keyring_id, " +
         "challenge_key_hash, challenge_key_salt, " +
         "keypair, keypair_salt, " +
         "pubkey, symkey, " +
@@ -227,6 +280,7 @@ exports.getAccountById = function getAccountById(accountId, callback) {
 
       callback(null, {
         username: result.rows[0].username,
+        sha256Username: result.rows[0].sha256_username,
         accountId: result.rows[0].account_id,
         keyringId: result.rows[0].base_keyring_id,
         keypairSalt: JSON.parse(result.rows[0].keypair_salt.toString()),
