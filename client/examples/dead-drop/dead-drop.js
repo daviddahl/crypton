@@ -20,8 +20,6 @@ app.init = function (session) {
   app.setUsername();
   app.setStatus(" ");
   app.session.on('message', function (data) {
-    console.log("incoming message!");
-    console.log(data);
     app.session.inbox.get(data.messageId, function (err, message) {
       // if (message.headers.app == 'deadDrop') {
         app.processMessage(message);
@@ -62,7 +60,6 @@ app.processMessage = function (message) {
   // add message to messages list:
   app.incomingMessages[message.messageId] = message;
 
-  console.log(message);
   var html = '<li id="'
            + message.messageId
            + '">'
@@ -78,7 +75,11 @@ app.processMessage = function (message) {
     $('#create-message').hide();
     // display the message in the <pre>, etc
     var msg = app.incomingMessages[message.messageId];
-    app.verifyDecryptDisplay(msg);
+    try {
+      app.verifyDecryptDisplay(msg);
+    } catch (ex) {
+      alert(ex);
+    }
   });
   $('#messages').append(node);
   // XXX: notify user of new message
@@ -91,10 +92,9 @@ app.verifyDecryptDisplay = function (message) {
       alert(err);
       return;
     }
-    console.log(peer);
-    var sct = JSON.parse(message.payload.plaintext);
-    var verified = app.session.account.verifyAndDecrypt(sct, peer);
-    console.log(verified);
+
+    var verified = app.session.account.verifyAndDecrypt(message.payload, peer);
+
     if (!verified.verified) {
       alert("Error: Could not verify the message signature!");
       return;
@@ -129,6 +129,7 @@ app.lookupPeer = function () {
   this.getPeer(peerName, function (err, peer) {
     if (err) {
       alert("Cannot find peer: " + err);
+      return;
     }
     // Set the username
     $('#compose-to').text(peerName);
@@ -163,14 +164,12 @@ app.sendMessage = function () {
   };
 
   var signedCiphertext = peer.encryptAndSign(message);
-  console.log(signedCiphertext)
   if (signedCiphertext.error) {
     alert(signedCiphertext.error);
     return;
   }
-  var payload = signedCiphertext;
 
-  peer.sendMessage(headers, payload, function (err, messageId) {
+  peer.sendMessage(headers, signedCiphertext, function (err, messageId) {
     // reset the UI, XXX: add the sent message to a container for sent messages
     app.resetUI();
   });
