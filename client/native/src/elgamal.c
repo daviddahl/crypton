@@ -18,7 +18,7 @@
 
 // XXXddahl: still converting this code example to do what we need...
 
-#define TAM_DADO 20
+#define SIZE 20
 #define ALG "elg"
 #define BITS "256"
 #define PADDING "raw"
@@ -31,6 +31,125 @@
 #include <stdlib.h>
 
 #include "elgamal.h"
+#include "base64.h"
+
+int generateElgKeypair(gcry_sexp_t keypair, gcry_sexp_t elgamal_sexp) {
+  gcry_error_t result;
+  size_t errorff;
+  
+  result = gcry_sexp_build(&keypair, &errorff, "(genkey (%s (nbits %s)))", ALG, BITS);
+  if (result != 0) {
+    fprintf(stderr, "s-exp build failure: %s/%s\n", 
+	    gcry_strsource (result), gcry_strerror (result));
+    return 1;
+  }
+
+  result = gcry_pk_genkey(&keypair, elgamal_sexp);
+  if (result != 0) {
+    fprintf(stderr, "genkey failure: %s/%s\n", 
+	    gcry_strsource (result), gcry_strerror (result));
+    return 1;
+  }
+  
+  return 0;
+}
+
+gcry_sexp_t getElgPubKey(gcry_sexp_t keypair) {
+  gcry_sexp_t pubkey;
+  pubkey = gcry_sexp_find_token(keypair, "public-key", 0);
+  return pubkey; /* May be NULL if not found */
+}
+
+gcry_sexp_t getElgPrivKey(gcry_sexp_t keypair) {
+  gcry_sexp_t privkey;
+
+  privkey = gcry_sexp_find_token(keypair, "private-key", 0);
+
+  return privkey; /* May be NULL if not found */
+}
+
+char* getRawWrappedKey(gcry_sexp_t wrappedKey) {
+  char *rawKey;
+  size_t size 2000; /* ??? what size here? */
+  int i;
+  
+  rawKey = (char *) malloc(sizeof(char)*size);
+
+  size = gcry_sexp_sprint(exp, GCRYSEXP_FMT_ADVANCED, rawKey, 2000);
+
+  printf("size = %Zi\n", size);
+  for(i = 0; i < size; i++) {
+    printf("%c", rawKey[i]);
+  }
+  printf("\n");
+
+  return rawKey;
+}
+
+int wrapSymKeyWithElgPubKey(gcry_sexp_t pubkey, 
+			    unsigned char* symKey, char* b64wrappedKey) {
+  gcry_error_t result;
+  size_t errorff;
+  gcry_sexp_t symKeySexp;
+  gcry_sexp_t wrappedSymKey;
+
+  result = gcry_sexp_build(&symKeySexp, &errorff, 
+			   "(data (flags %s) (value %b))", 
+			   PADDING, SIZE, symKey);
+  if (result != 0) {
+    fprintf (stderr, "failure creating symKeySexp: %s/%s\n", 
+	     gcry_strsource (err), gcry_strerror (err));
+  }
+  
+  result = gcry_pk_encrypt(&wrappedSymKey, symKeySexp, pubkey);
+  if (result != 0) {
+    fprintf (stderr, "failure wrapping symKey: %s/%s\n", 
+	     gcry_strsource (err), gcry_strerror (err));
+  }
+  
+  /* convert the wrapped key to char*  */
+  b64wrappedKey = base64(wrappedSymKey, strlen(wrappedSymKey), 0);
+  /* XXXddahl: check return value of base64 */
+  return 0;
+}
+
+/*   
+   ECC methods
+*/
+int generateECCSymKey() {
+
+}
+
+int symEncryptECCKey() {
+
+}
+
+int encryptDataWithElgPK() {
+  /* 
+     1. Generate ECC? symKey
+     2. encrypt data with symKey
+     3. wrap symKey
+     4. return struct containing wrappedKey, IV, ciphertext    
+   */
+}
+
+int decryptDataWithElgPK() {
+
+}
+
+/* 
+   sign() and verify() will be in ecdsa.c 
+*/
+
+/* 
+   encryptAndSign(), verifyAndDecrypt(), 
+   generateKeyRing()  will be in crypton.c
+
+*/
+
+
+
+/* -------------ORIGINAL EXAMPLE ------------------------------ */
 
 void check_error(gcry_error_t err)
 {
@@ -61,7 +180,7 @@ int main(void)
 {
   const char *version;
   gcry_sexp_t pubk, seck, par, enc_data, dec_data, to_dec_func, raw_data, raw_enc_data, gkey;
-  unsigned char *dado;
+  unsigned char *data;
   int i;
   size_t errorff;
   gcry_error_t ret;
@@ -82,13 +201,13 @@ int main(void)
    * Create a data block to be encrypted
    */
 
-  dado = (unsigned char*) malloc(sizeof(char)*TAM_DADO);
+  data = (unsigned char*) malloc(sizeof(char)*SIZE);
 
   printf("Creating data block:.\n");
-  for(i = 0; i < TAM_DADO; i++)
+  for(i = 0; i < SIZE; i++)
     {
-      dado[i] = (unsigned char) i;
-      printf("[%X]", dado[i]);
+      data[i] = (unsigned char) i;
+      printf("[%X]", data[i]);
     }
   printf("\n");
   fflush(stdout);
@@ -124,7 +243,9 @@ int main(void)
 
   printf("S-expression to encrypt:\n");
 	
-  ret = gcry_sexp_build(&raw_data, &errorff, "(data (flags %s) (value %b))", PADDING, TAM_DADO, dado);
+  ret = gcry_sexp_build(&raw_data, &errorff, 
+			"(data (flags %s) (value %b))", 
+			PADDING, SIZE, data);
   check_error(ret);
   print_sexp(raw_data);
 
@@ -176,7 +297,7 @@ int main(void)
 
   printf("Done!\n");
   fflush(stdout);
-  free(dado);
+  free(data);
 
   return 0;
 }

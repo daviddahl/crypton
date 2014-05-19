@@ -27,6 +27,8 @@
 
 #include "pbkdf2.h"
 #include "elgamal.h"
+#include "ecdsa.h"
+
 
 /* 
  * This header file includes the public interface for native crypton
