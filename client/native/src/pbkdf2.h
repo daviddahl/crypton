@@ -23,25 +23,28 @@
 #include "gcrypt.h"
 #include "gpg-error.h"
 
-struct masterKey {
-  unsigned char key[32];
-  unsigned char salt[16];
+struct keyItem {
+  char* key;
+  unsigned char* salt;
+  unsigned char name;
 };
 
 struct wrappedKeyItem {
-  char ciphertext; // XXXddahl length??
-  unsigned int iv; // char or int? see above...
-  unsigned char name[16];
+  char* ciphertext;
+  unsigned int* iv;
+  unsigned char name;
 };
 
 struct wrappedKeyRing {
-  wrappedKeyItem encryptionPubKey;
-  wrappedKeyItem encryptionPrivKey;
-  wrappedKeyItem signingPubKey;
-  wrappedKeyItem signingPrivKey;
-  wrappedKeyItem hmacKey;
-}; // XXXddahl: still working this out...
+  struct wrappedKeyItem masterKey;
+  struct keyItem encryptionPubKey;
+  struct wrappedKeyItem encryptionPrivKey;
+  struct keyItem signingPubKey;
+  struct wrappedKeyItem signingPrivKey;
+  struct wrappedKeyItem hmacKey;
+};
 
-int generateKeyFromPassword(const char* passphrase, struct masterKey* key);
+int generateKeyFromPassword(char* passphrase, struct keyItem* key);
 
-int wrapKeyData(char* keyRingItem, struct masterKey key);
+int wrapKeyItem(char* privateKey, struct keyItem key, 
+		unsigned char name, struct wrappedKeyItem* out);

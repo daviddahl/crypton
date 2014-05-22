@@ -114,23 +114,46 @@ int wrapSymKeyWithElgPubKey(gcry_sexp_t pubkey,
 }
 
 /*   
-   ECC methods
+   Symmetric Encryption methods
 */
-int generateECCSymKey() {
 
+struct elgCiphertext {
+  char wrappedKey[64];
+  int keyIv[16];
+  char* cipherText;
+  int cipherTextIv[16];
+};
+
+int generateSymKey(void* symKey) {
+  unsigned char _symKey[32];
+  gcry_randomize(_symKey, sizeof(_symKey), GCRY_STRONG_RANDOM);
+  if (!symKey) {
+    return 1
+  }
+  fprintf (stderr, "symKey: %s\n", _symKey);
+  symKey = _symKey;
+  return 0;
 }
 
-int symEncryptECCKey() {
-
-}
-
-int encryptDataWithElgPK() {
+int encryptDataWithElgPK(char* data, elgCiphertext* cipherText) {
   /* 
-     1. Generate ECC? symKey
+     1. Generate AES symKey
      2. encrypt data with symKey
      3. wrap symKey
      4. return struct containing wrappedKey, IV, ciphertext    
    */
+  int result;
+  void* symKey;
+  result = generateSymKey(symKey);
+  if (!result) {
+    printf (stderr, "symKey generation failed\n");
+    return 1;
+  }
+  
+  
+
+
+  return 0;
 }
 
 int decryptDataWithElgPK() {
