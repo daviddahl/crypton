@@ -27,21 +27,20 @@
 #define GCRY_CIPHER GCRY_CIPHER_RIJNDAEL256
 #define GCRY_CIPHER_MODE GCRY_CIPHER_MODE_CTR
 #define RNDM_BYTES_LENGTH 32
+#define SALT_LENGTH 16
 
 int generateKeyFromPassword(char* passphrase, struct keyItem* item)
 {
   int i; 
-  unsigned char* salt;
-  salt = gcry_random_bytes(16, GCRY_STRONG_RANDOM);
+  unsigned char* salt = gcry_random_bytes(SALT_LENGTH, GCRY_STRONG_RANDOM);
   char* keyBuffer;
-  size_t saltLen = 32;
   size_t keySize = 32;
   gpg_error_t err; 
   unsigned long iterations = 10000;
 
   err = gcry_kdf_derive(passphrase, strlen(passphrase), 
 			GCRY_KDF_PBKDF2, GCRY_MD_SHA256, 
-	                salt, saltLen, 
+	                salt, SALT_LENGTH, 
 			iterations, keySize, keyBuffer);
   if (err) {
     printf("Error generating key from password. Error no: %d and message: %s\n ", 

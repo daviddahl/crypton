@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "base64.h"
+
 #include "gcrypt.h"
 #include "gpg-error.h"
 
@@ -33,7 +35,7 @@ struct wrappedKeyItem {
   char* ciphertext;
   unsigned int* iv;
   unsigned char name;
-};
+}; /* XXX: Need to add a TAG property */
 
 struct wrappedKeyRing {
   struct wrappedKeyItem masterKey;
