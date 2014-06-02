@@ -25,7 +25,7 @@
 #include "pbkdf2.h"
 
 #define GCRY_CIPHER GCRY_CIPHER_RIJNDAEL256
-#define GCRY_CIPHER_MODE GCRY_CIPHER_MODE_CTR
+#define GCRY_CIPHER_MODE GCRY_CIPHER_MODE_CTR /* XXXdahl: should be using GCM mode!!! doesn't work with AES 256 :( */
 #define RNDM_BYTES_LENGTH 32
 #define SALT_LENGTH 16
 
@@ -53,25 +53,25 @@ int generateKeyFromPassword(char* passphrase, struct keyItem* item)
   printf("%s\n", keyBuffer);
   item->key = keyBuffer;
   item->salt = salt;
-  item->name = (unsigned char)"masterKey";
+  item->name = (unsigned char*)"masterKey";
 
   return 0;
 }
 
 /* Wrap a keyitem with a key  */
 int wrapKeyItem (char* privateKey, struct keyItem key, 
-		 unsigned char name, struct wrappedKeyItem* out)
+		 unsigned char* name, struct wrappedKeyItem* out)
 {
   size_t keyLength = gcry_cipher_get_algo_keylen(GCRY_CIPHER);
   size_t blkLength = gcry_cipher_get_algo_blklen(GCRY_CIPHER);
-  size_t privateKeyLength = strlen(privateKey) + 1; // string plus termination
+  size_t privateKeyLength = strlen(privateKey) + 1;
   char *encBuffer = malloc(privateKeyLength);
   gcry_error_t err = 0;
   
   // Create a handle
-  gcry_cipher_hd_t handle;
+  gcry_cipher_hd_t handle = NULL;
   err = gcry_cipher_open(&handle, GCRY_CIPHER, GCRY_CIPHER_MODE, 0);
-  if (!handle) {
+  if (err) {
     printf("GCM algo %d, gcry_cipher_open failed: %s\n",
 	   GCRY_CIPHER, gpg_strerror (err));
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
@@ -147,12 +147,12 @@ int main()
   printf("key: %s\n", masterKey.key);
   printf("salt:  %d\n", (int)masterKey.salt);
 
-  char* name;
-  name = "myWrappedMasterKey";
+  unsigned char* name;
+  name = (unsigned char*)"myWrappedMasterKey";
   struct wrappedKeyItem wrappedKey;
   
   // Encrpt keyring item
-  err = wrapKeyItem(masterKey.key, masterKey, (unsigned char)&name, &wrappedKey);
+  err = wrapKeyItem(masterKey.key, masterKey, name, &wrappedKey);
   
   if (err) {
     printf("error: %u\n", err);

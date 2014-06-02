@@ -21,6 +21,7 @@
 #include <assert.h>
 
 #include "base64.h"
+#include "dbg.h"
 
 #include "gcrypt.h"
 #include "gpg-error.h"
@@ -28,13 +29,13 @@
 struct keyItem {
   char* key;
   unsigned char* salt;
-  unsigned char name;
+  unsigned char* name;
 };
 
 struct wrappedKeyItem {
   char* ciphertext;
   unsigned int* iv;
-  unsigned char name;
+  unsigned char* name;
 }; /* XXX: Need to add a TAG property */
 
 struct wrappedKeyRing {
@@ -49,4 +50,4 @@ struct wrappedKeyRing {
 int generateKeyFromPassword(char* passphrase, struct keyItem* key);
 
 int wrapKeyItem(char* privateKey, struct keyItem key, 
-		unsigned char name, struct wrappedKeyItem* out);
+		unsigned char* name, struct wrappedKeyItem* out);
