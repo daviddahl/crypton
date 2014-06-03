@@ -18,7 +18,7 @@
 
 /* 
 
-   clang pbkdf2.c -I /var/opt/lib -I /var/opt/include -lgcrypt -lgpg-error -o pbkdf
+   clang pbkdf2.c -I /var/opt/lib -I /var/opt/include -lgcrypt -lgpg-error -o pbkdf -g
  
 */
 
@@ -50,6 +50,7 @@ int generateKeyFromPassword(char* passphrase, struct keyItem* item)
     printf("Error generating key from password. Error no: %d and message: %s\n ", 
 	   err, 
 	   gcry_strerror(err));
+    free(keyBuffer);
     return 1;
   }
 
@@ -81,6 +82,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
 	   GCRY_CIPHER, gpg_strerror (err));
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
     free(encBuffer);
+    gcry_cipher_close(handle);
     return 1;
   }
   // Set the key
@@ -91,6 +93,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
     printf("gcry_cipher_setkey failed.");
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
     free(encBuffer);
+    gcry_cipher_close(handle);
     return 1;
   }
   
@@ -102,6 +105,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   if (err) {
     printf("gcry_cipher_setiv failed.");
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    gcry_cipher_close(handle);
     free(encBuffer);
     return 1;
   }
@@ -114,6 +118,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
     printf("gcry_cipher_encrypt failed.");
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
     free(encBuffer);
+    gcry_cipher_close(handle);
     return 1;
   }
 
@@ -123,8 +128,8 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   out->name = name;
 
   // Free memory
-  gcry_cipher_close(handle);
   free(encBuffer);
+  gcry_cipher_close(handle);
   
   return 0;
 }
