@@ -22,6 +22,7 @@
 
 #include "base64.h"
 #include "dbg.h"
+#include "bstrlib.h"
 
 #include "gcrypt.h"
 #include "gpg-error.h"

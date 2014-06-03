@@ -28,15 +28,19 @@
 #define GCRY_CIPHER_MODE GCRY_CIPHER_MODE_CTR /* XXXdahl: should be using GCM mode!!! doesn't work with AES 256 :( */
 #define RNDM_BYTES_LENGTH 32
 #define SALT_LENGTH 16
+#define PBKDF2_KEYSIZE_OCTETS 32
+#define HASH_ITERATIONS 10000
+#define PBKDF2_KEYSIZE_BITS (PBKDF2_KEYSIZE_OCTETS * 8) 
 
 int generateKeyFromPassword(char* passphrase, struct keyItem* item)
 {
   int i; 
   unsigned char* salt = gcry_random_bytes(SALT_LENGTH, GCRY_STRONG_RANDOM);
   char* keyBuffer;
-  size_t keySize = 32;
+  keyBuffer  = malloc(sizeof(char) * PBKDF2_KEYSIZE_BITS);
+  size_t keySize = PBKDF2_KEYSIZE_OCTETS;
   gpg_error_t err; 
-  unsigned long iterations = 10000;
+  unsigned long iterations = HASH_ITERATIONS;
 
   err = gcry_kdf_derive(passphrase, strlen(passphrase), 
 			GCRY_KDF_PBKDF2, GCRY_MD_SHA256, 
@@ -66,6 +70,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   size_t blkLength = gcry_cipher_get_algo_blklen(GCRY_CIPHER);
   size_t privateKeyLength = strlen(privateKey) + 1;
   char *encBuffer = malloc(privateKeyLength);
+  size_t encBufferLength = strlen(privateKey) + 1;
   gcry_error_t err = 0;
   
   // Create a handle
@@ -75,6 +80,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
     printf("GCM algo %d, gcry_cipher_open failed: %s\n",
 	   GCRY_CIPHER, gpg_strerror (err));
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    free(encBuffer);
     return 1;
   }
   // Set the key
@@ -84,6 +90,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   if (err) {
     printf("gcry_cipher_setkey failed.");
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    free(encBuffer);
     return 1;
   }
   
@@ -95,6 +102,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   if (err) {
     printf("gcry_cipher_setiv failed.");
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    free(encBuffer);
     return 1;
   }
 
@@ -105,6 +113,7 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   if (err) {
     printf("gcry_cipher_encrypt failed.");
     printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    free(encBuffer);
     return 1;
   }
 
