@@ -47,18 +47,30 @@ int generateKeyFromPassword(char* passphrase, struct keyItem* item)
 	                salt, SALT_LENGTH, 
 			iterations, keySize, keyBuffer);
   if (err) {
-    printf("Error generating key from password. Error no: %d and message: %s\n ", 
+    log_err("Error generating key from password. Error no: %d and message: %s\n ", 
 	   err, 
 	   gcry_strerror(err));
     free(keyBuffer);
     return 1;
   }
 
-  printf("Key: \n");        
-  printf("%s\n", keyBuffer);
+  log_info("Key: \n");        
+  log_info("%s\n", keyBuffer);
   item->key = keyBuffer;
   item->salt = salt;
   item->name = (unsigned char*)"masterKey";
+
+  // base64 encode the key:
+  char* base64Data = NULL;
+  int inLen = strlen(keyBuffer);
+  int outLen; 
+  base64Data = base64(keyBuffer, inLen, &outLen);
+
+  if (base64Data == NULL) {
+    log_err("Base64 encoding failed");
+  } else {
+    log_info("Base64 result: %s", base64Data);
+  }
 
   return 0;
 }
@@ -78,9 +90,9 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   gcry_cipher_hd_t handle = NULL;
   err = gcry_cipher_open(&handle, GCRY_CIPHER, GCRY_CIPHER_MODE, 0);
   if (err) {
-    printf("GCM algo %d, gcry_cipher_open failed: %s\n",
-	   GCRY_CIPHER, gpg_strerror (err));
-    printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    log_err("GCM algo %d, gcry_cipher_open failed: %s\n",
+	    GCRY_CIPHER, gpg_strerror (err));
+    log_err("Error no: %d and message: %s\n ", err, gcry_strerror(err));
     free(encBuffer);
     gcry_cipher_close(handle);
     return 1;
@@ -90,8 +102,8 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
 			   key.key,
 			   keyLength);
   if (err) {
-    printf("gcry_cipher_setkey failed.");
-    printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    log_err("gcry_cipher_setkey failed.");
+    log_err("Error no: %d and message: %s\n ", err, gcry_strerror(err));
     free(encBuffer);
     gcry_cipher_close(handle);
     return 1;
@@ -103,8 +115,8 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
   err = gcry_cipher_setiv(handle, iv, blkLength);
   
   if (err) {
-    printf("gcry_cipher_setiv failed.");
-    printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    log_err("gcry_cipher_setiv failed.");
+    log_err("Error no: %d and message: %s\n ", err, gcry_strerror(err));
     gcry_cipher_close(handle);
     free(encBuffer);
     return 1;
@@ -115,17 +127,29 @@ int wrapKeyItem (char* privateKey, struct keyItem key,
                             privateKeyLength, privateKey, 
 			    privateKeyLength);
   if (err) {
-    printf("gcry_cipher_encrypt failed.");
-    printf("Error no: %d and message: %s\n ", err, gcry_strerror(err));
+    log_err("gcry_cipher_encrypt failed.");
+    log_err("Error no: %d and message: %s\n ", err, gcry_strerror(err));
     free(encBuffer);
     gcry_cipher_close(handle);
     return 1;
   }
 
-  printf("encBuffer: %s\n ", encBuffer);
+  log_info("encBuffer: %s\n ", encBuffer);
   out->ciphertext = encBuffer;
   out->iv = iv;
   out->name = name;
+
+  // base64 encode the wrapped key:
+  char* base64Data = NULL;
+  int inLen = strlen(encBuffer);
+  int outLen; 
+  base64Data = base64(encBuffer, inLen, &outLen);
+
+  if (base64Data == NULL) {
+    log_err("Base64 encoding failed");
+  } else {
+    log_info("BAse64 result: %s", base64Data);
+  }
 
   // Free memory
   free(encBuffer);
@@ -155,11 +179,11 @@ int main()
   err = generateKeyFromPassword(pass, &masterKey);
 
   if (err) {
-    printf("error: %u\n", err);
+    log_err("error: %u\n", err);
   }
 
-  printf("key: %s\n", masterKey.key);
-  printf("salt:  %d\n", (int)masterKey.salt);
+  log_info("key: %s\n", masterKey.key);
+  log_info("salt:  %d\n", (int)masterKey.salt);
 
   unsigned char* name;
   name = (unsigned char*)"myWrappedMasterKey";
@@ -169,7 +193,7 @@ int main()
   err = wrapKeyItem(masterKey.key, masterKey, name, &wrappedKey);
   
   if (err) {
-    printf("error: %u\n", err);
+    log_err("error: %u\n", err);
   }
 
   return 0;
