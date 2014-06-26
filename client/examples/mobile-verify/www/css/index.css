@@ -117,3 +117,13 @@ h1 {
 .view {
     display: none;
 }
+
+input {
+    font-size: 1.5em;
+    padding: 0.3em;
+    margin: o.2em;
+}
+
+button {
+    font-size: 1.5em;
+}
