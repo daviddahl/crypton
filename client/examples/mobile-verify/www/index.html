@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <title>Crypton Mobile User Verifier</title>
+    </head>
+    <body>
+        <div class="app">
+            <h1>Crypton Mobile User Verifier</h1>
+	    
+	    <div id="account-login" class="view">
+	      <span class="status"></span>
+	      <br />
+	      <input placeholder="Username" 
+		     id="username-login" type="text" />
+	      </br />
+	      <input placeholder="Passphrase" 
+		     id="password-login" type="password" 
+		     autocomplete="off" />
+	      <br />
+	      <button id="register-btn">Create Account</button>
+	      <button id="login-btn">Login</button>
+	    </div>
+
+	    <div id="scan-select" class="view">
+	      <h2 id="account-name"></h2>
+	      <button id="scan">Scan QR Code</button> 
+	      <br /> 
+	      OR
+	      <br />
+	      <button id="get-image">Select ID Image</button>
+	    </div>
+
+	    <div id="images" class="view">
+	      <img id="picture"/>
+	    </div>
+        </div>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/crypton.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript" src="js/jquery.min.js"></script>
+
+	<script type="text/javascript" src="js/vendor/jsqrcode/grid.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/version.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/detector.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/formatinf.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/errorlevel.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/bitmat.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/datablock.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/bmparser.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/datamask.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/rsdecoder.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/gf256poly.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/gf256.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/decoder.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/qrcode.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/findpat.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/alignpat.js"></script>
+	<script type="text/javascript" src="js/vendor/jsqrcode/databr.js"></script>
+
+        <script type="text/javascript">
+            app.initialize();
+        </script>
+    </body>
+</html>
