@@ -24,18 +24,18 @@ body {
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
     -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
     -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
-    background-color:#E4E4E4;
-    background-image:linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-webkit-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-ms-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%);
-    background-image:-webkit-gradient(
-        linear,
-        left top,
-        left bottom,
-        color-stop(0, #A7A7A7),
-        color-stop(0.51, #E4E4E4)
-    );
-    background-attachment:fixed;
+    /* background-color:#E4E4E4; */
+    /* background-image:linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%); */
+    /* background-image:-webkit-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%); */
+    /* background-image:-ms-linear-gradient(top, #A7A7A7 0%, #E4E4E4 51%); */
+    /* background-image:-webkit-gradient( */
+    /*     linear, */
+    /*     left top, */
+    /*     left bottom, */
+    /*     color-stop(0, #A7A7A7), */
+    /*     color-stop(0.51, #E4E4E4) */
+    /* ); */
+    /* background-attachment:fixed; */
     font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
     font-size:12px;
     height:100%;
@@ -47,16 +47,11 @@ body {
 
 /* Portrait layout (default) */
 .app {
-    /* background:url(../img/logo.png) no-repeat center top; /\* 170px x 200px *\/ */
-    position:absolute;             /* position in the center of the screen */
-    left:50%;
-    top:50%;
-    height:50px;                   /* text area height */
-    width:225px;                   /* text area width */
-    text-align:center;
-    padding:180px 0px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
-    margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
-                                   /* offset horizontal: half of text area width */
+    position:absolute;
+    /* text-align:center; /\* position in the center of the screen *\/ */
+    width: 100%;
+    height: 100%;
+    background-color: white;
 }
 
 /* Landscape layout (with min-width) */
@@ -118,12 +113,54 @@ h1 {
     display: none;
 }
 
-input {
-    font-size: 2em;
-    padding: 0.3em;
-    margin: o.2em;
+#top-menu {
+    display: none;
+    margin-bottom: 1em;
 }
 
-button {
-    font-size: 2em;
+#login-progress {
+    display: none;
+}
+
+#login-form {
+    margin-bottom: 1em;
+}
+
+#login-buttons {
+    margin-bottom: 1em;
+}
+
+#app-title {
+    margin-bottom: 1em;
+}
+
+.main-btns {
+    width: 100%;
+    margin-bottom: 1px;
+}
+
+#tasks-btn {
+    display: none;
+    margin-right: 1em;
+}
+
+#account-name-label {
+    display: none;
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+
+.main-btn {
+    font-size: 1.5em;
+    font-weight: bold;
+    border:1px solid #ECE5E5;
+}
+
+#find-user-form {
+    margin-bottom: 1em;
+}
+
+#contacts-list li {
+    font-size: 1.5em;
+    border-bottom: 1px solid #ccc;
 }

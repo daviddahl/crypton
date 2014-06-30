@@ -24,44 +24,152 @@
         <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
-        <title>Crypton Mobile User Verifier</title>
+        <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap.min.css" />
+        <title>Crypton User Verifier</title>
     </head>
     <body>
-        <div class="app">
-            <h1>Crypton Mobile User Verifier</h1>
-	    
-	    <div id="account-login" class="view">
-	      <span class="status"></span>
-	      <br />
-	      <input placeholder="Username" 
-		     id="username-login" type="text" />
-	      </br />
-	      <input placeholder="Passphrase" 
-		     id="password-login" type="password" 
-		     autocomplete="off" />
-	      <br />
-	      <button id="register-btn">Create Account</button>
-	      <button id="login-btn">Login</button>
-	    </div>
+      <div id="app" class="app container-fluid">
 
-	    <div id="scan-select" class="view">
-	      <h2 id="account-name"></h2>
-	      <button id="scan">Scan QR Code</button> 
-	      <br /> 
-	      OR
-	      <br />
-	      <button id="get-image">Select ID Image</button>
-	    </div>
+	<div id="header">
+	  <h3>	    
+	    <button id="tasks-btn" 
+		    type="button" class="btn btn-default btn-lg">
+	      <span class="glyphicon glyphicon-tasks"></span>
+	    </button>
+	    Crypton Verifier 
+	  </h3>
+	   <h4 id="account-name-label">
+	     Logged in as 
+	     <span class="label label-default" id="account-name"></span>
+	   </h4>
+	</div>
 
-	    <div id="images" class="view">
-	      <img id="picture"/>
+	<ul id="top-menu" class="menu nav nav-stacked">
+	  <li class="active main-btn" id="my-messages">
+	    <a href="#">
+	      <span class="badge pull-right">0</span>
+	      Messages
+	    </a>
+
+	  </li>
+	  <li class="main-btn" id="my-fingerprint">
+	    <a href="#">
+	      My ID Card
+	    </a>
+	  </li>
+	  <li class="main-btn" id="verify-id-card">
+	    <a href="#">
+	      Verify an ID Card
+	    </a>
+	  </li>
+	  <li class="main-btn" id="my-contacts">
+	    <a href="#">
+	      My Contacts
+	    </a>
+	  </li>
+	  <li class="main-btn" id="find-users">
+	    <a href="#">
+	      Find a User
+	    </a>
+	  </li>
+	  <li class="main-btn" id="logout">
+	    <a href="#">
+	      Logout
+	    </a>
+	  </li>
+	</ul>
+
+	<div id="find-users-view" class="view">
+	  <div id="find-user-form" class="input-group input-group-lg">
+	    <input id="find-someone" 
+		   type="text"
+		   size="12"
+		   maxlength="32"
+		   type="text" class="form-control">
+	    <span class="input-group-btn btn-group-lg">
+	      <button id="find-someone-btn" 
+		      class="btn btn-default" 
+		      type="button">Find User</button>
+	    </span>
+	  </div>
+
+	</div>
+
+	<div id="account-login" class="view">
+	  <span class="status"></span>
+
+	  <div id="login-form" class="input-group input-group-lg">
+	    <input placeholder="Username"
+		   size="12"
+		   maxlength="32"
+		   class="form-control login-input" 
+		   id="username-login" type="text" />
+	    <input placeholder="Passphrase" 
+		   size="12"
+		   maxlength="32"
+		   class="form-control login-input"
+		   id="password-login" type="password" 
+		   autocomplete="off" />
+	  </div>
+
+	  <div id="login-buttons" class="btn-group btn-group-lg">
+	    <button class="btn btn-default" 
+		    id="register-btn">Create Account</button>
+	    <button class="btn btn-default"
+		    id="login-btn">Login</button>
+	  </div>
+
+	  <div id="login-progress" 
+	       class="progress progress-striped active">
+	    <div class="progress-bar"  role="progressbar" 
+		 aria-valuenow="100" aria-valuemin="0" 
+		 aria-valuemax="100" style="width: 100%">
 	    </div>
-        </div>
+	  </div>
+
+	</div>
+
+	<div id="scan-select" class="view">
+	  <div class="btn-group">
+	    <button type="button" 
+		    class="btn btn-default"
+		    id="scan">Scan QR Code</button> 
+	    <button type="button" 
+		    class="btn btn-default"
+		    id="get-image">Choose ID CARD Image</button>
+	  </div>
+	</div>
+
+	<div id="contacts" class="view">
+	  <ul id="contacts-list" class="nav nav-pills nav-stacked">
+	  </ul>
+	</div>
+
+	<div id="contact-details" class="view">
+	  <button type="button"
+		  class="btn"
+		  id="contacts-detail-dismiss-btn">
+	    Done
+	  </button>
+	</div>
+
+	<div id="my-fingerprint-id" class="view">
+	</div>
+
+	<div id="peer-fingerprint-id" class="view">
+	</div>
+
+	<div id="images" class="view">
+	  <img id="picture"/>
+	</div>
+
+      </div>
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/crypton.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
         <script type="text/javascript" src="js/jquery.min.js"></script>
-
+	<script type="text/javascript" src="js/vendor/bootstrap.min.js"></script>
+	<!-- BEGIN QR Code Reader --> 
 	<script type="text/javascript" src="js/vendor/jsqrcode/grid.js"></script>
 	<script type="text/javascript" src="js/vendor/jsqrcode/version.js"></script>
 	<script type="text/javascript" src="js/vendor/jsqrcode/detector.js"></script>
@@ -79,7 +187,7 @@
 	<script type="text/javascript" src="js/vendor/jsqrcode/findpat.js"></script>
 	<script type="text/javascript" src="js/vendor/jsqrcode/alignpat.js"></script>
 	<script type="text/javascript" src="js/vendor/jsqrcode/databr.js"></script>
-
+	<!-- END QR Code Reader --> 
         <script type="text/javascript">
             app.initialize();
         </script>
