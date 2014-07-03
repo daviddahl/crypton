@@ -30,7 +30,7 @@ var app = {
 
   APPNAME: 'User Verifier',
 
-  URL: 'https://crypon.io',
+  URL: 'https://crypton.io',
 
   get username() { return app.session.account.username },
 
@@ -98,7 +98,7 @@ var app = {
       hideMainButtons('my-fingerprint');
       $('.view').hide();
       $('#my-fingerprint-id').show();
-      app.displayMyFingerprint();
+      app.displayMyFingerprint(true);
     });
 
     $('#find-users').click(function () {
@@ -203,6 +203,39 @@ var app = {
     );
   },
 
+  getPhoto: function (callback) {
+    // via the CAMERA
+    function onSuccess (imageURI) {
+      console.log(imageURI);
+      // XXXddahl: should not have to add to the DOM here!
+      // var largeImage = document.getElementById('picture');
+      // largeImage.style.display = 'block';
+      // largeImage.src = "data:image/jpeg;base64," + imageURI;
+      // We need to return an image object
+      var img = $('<img />')[0];
+      img.src = "data:image/jpeg;base64," + imageURI;
+      // img.height = "64";
+      // img.width = "48";
+      // return this photo to the callback
+      callback(null, img);
+    }
+
+    function onFail (message) {
+      callback(message);
+      app.alert('An error occured: ' + message, 'danger');
+    }
+
+    //Specify the source to get the photos.
+    navigator.camera.getPicture(onSuccess, onFail,
+                                { quality: 50,
+                                  destinationType:
+                                  Camera.DestinationType.DATA_URL,
+                                  sourceType:
+                                  navigator.camera.PictureSourceType.CAMERA
+                                });
+
+  },
+
   getImage: function () {
     function onSuccess (imageURI) {
       console.log(imageURI);
@@ -218,6 +251,7 @@ var app = {
       try {
         qrcode.decode(imageURI);
       } catch (e) {
+        app.alert('Cannot decode QR code', 'danger');
         console.error(e);
       }
     }
@@ -413,23 +447,143 @@ var app = {
     $('#peer-fingerprint-id').append(canvas);
   },
 
-  displayMyFingerprint: function () {
+  displayMyFingerprint: function (withPhoto) {
+    function displayIdCard(idCard) {
+      $(idCard).css({ width: '300px', 'margin-top': '1em'});
+      $('#my-fingerprint-id').append(idCard);
+
+      var idCardTitle = app.username + ' ' + app.APPNAME + ' ID Card';
+      var base64Img = canvas.toDataURL("image/png");
+      var html = '<button id="share-my-id-card" '
+               + 'class="btn btn-default">Share My ID Card</button>';
+
+      $('#my-fingerprint-id').append(html);
+
+      $('#share-my-id-card').click(function () {
+        window.plugins.socialsharing.share(null, idCardTitle, base64Img, null);
+      });
+    }
+
     $('#my-fingerprint-id').children().remove();
     var canvas =
       app.utils.createIdCard(app.fingerprint, app.username,
                              app.APPNAME, app.URL);
-    $(canvas).css({ width: '300px', 'margin-top': '1em'});
-    $('#my-fingerprint-id').append(canvas);
+    if (withPhoto) {
+      app.addPhotoToIdCard(canvas, function (err, idCard) {
+        console.log('addPhotoToIdCard callback');
+        console.log(idCard);
+        if (err) {
+          return app.alert(err, 'danger');
+        }
+        displayIdCard(idCard);
+      });
+    }
+  },
 
-    var idCardTitle = app.username + ' ' + app.APPNAME + ' ID Card';
-    var base64Img = canvas.toDataURL("image/png");
-    var html = '<button id="share-my-id-card" '
-             + 'class="btn btn-default">Share My ID Card</button>';
+  PHOTO_CONTAINER: '_id_photo',
 
-    $('#my-fingerprint-id').append(html);
+  addPhotoToIdCard: function (idCard, callback) {
+    // check for existing photo:
+    app.loadOrCreateContainer(app.PHOTO_CONTAINER,
+      function (err, rawContainer) {
+        if (err) {
+          return callback(err);
+        }
+        // paste photo into ID:
+        function pastePhoto(imageData, idCard) {
+          var thumb = app.thumbnail(imageData, 100, 100);
+          var ctx = idCard.getContext('2d');
+          ctx.drawImage(thumb, 280, 10);
+          return idCard;
+        }
+        var photo = rawContainer;
+        if (photo.keys['imgData']) {
+          // XXXddahl: try ??
+          var photoIdCard = pastePhoto(photo.keys['imgData'], idCard);
+          return callback(null, idCard);
+        } else {
+          app.getPhoto(function (err, image) {
+            console.log('getPhoto Callback');
+            console.log(image);
+            photo.keys['imgData'] = image.src;
+            photo.save(function (err){
+              if (err) {
+                var _err = 'Cannot save photo data to server';
+                console.error(_err + ' ' + err);
+                return app.alert(_err);
+              }
+              // photo is saved to the server
+              var photoIdCard =
+                pastePhoto(photo.keys['imgData'], idCard);
+              // console.log(photoIdCard);
+              return callback(null, photoIdCard);
+            });
+          });
+        }
+    });
+  },
 
-    $('#share-my-id-card').click(function () {
-      window.plugins.socialsharing.share(null, idCardTitle, base64Img, null);
+  thumbnail: function thumbnail(base64, maxWidth, maxHeight) {
+
+    // Max size for thumbnail
+    if(typeof(maxWidth) === 'undefined') var maxWidth = 120;
+    if(typeof(maxHeight) === 'undefined') var maxHeight = 120;
+
+    // Create and initialize two canvas
+    var canvas = document.createElement("canvas");
+    var ctx = canvas.getContext("2d");
+    var canvasCopy = document.createElement("canvas");
+    var copyContext = canvasCopy.getContext("2d");
+
+    // Create original image
+    var img = new Image();
+    img.src = base64;
+
+    // Determine new ratio based on max size
+    var ratio = 1;
+    if(img.width > maxWidth)
+      ratio = maxWidth / img.width;
+    else if(img.height > maxHeight)
+      ratio = maxHeight / img.height;
+
+    // Draw original image in second canvas
+    canvasCopy.width = img.width;
+    canvasCopy.height = img.height;
+    copyContext.drawImage(img, 0, 0);
+
+    // Copy and resize second canvas to first canvas
+    canvas.width = img.width * ratio;
+    canvas.height = img.height * ratio;
+    ctx.drawImage(canvasCopy, 0, 0,
+                  canvasCopy.width, canvasCopy.height,
+                  0, 0, canvas.width, canvas.height);
+
+    return canvas;
+  },
+
+  debugger: {
+    deletePhoto: function () {
+      app.session.deleteContainer(app.PHOTO_CONTAINER,
+        function (err) {
+          if (err){
+            app.alert(err, 'danger');
+          } else {
+            app.alert('deleted', 'info'); }
+        });
+    }
+  },
+
+  loadOrCreateContainer: function (containerName, callback) {
+    app.session.load(containerName, function (err, container) {
+      if (err) {
+        return app.session.create(containerName, function (err) {
+          if (err) {
+            return callback(err);
+          }
+          app.loadOrCreateContainer(containerName, callback);
+        });
+      }
+      callback(err, container);
     });
   },
 
@@ -459,6 +613,7 @@ var app = {
   },
 
   contactDetails: function (name) {
+    $('#contact-id').remove();
     var contact = app._contacts[name];
     // display the contact's fingerprint ID card:
     var canvas = app.utils.createIdCard(contact.fingerprint,
@@ -479,7 +634,40 @@ var app = {
         return callback(err);
       }
       app.contactsContainer = rawContainer;
-      callback(null, app.contactsContainer.keys);
+      return callback(null, app.contactsContainer.keys);
     });
+  },
+
+  createOrOpenMessage: function (username) {
+    // see if we already have a message container for this user:
+    // XXXddahl: start indeterminate progressbar??
+    var containerName = '_message_' + username;
+    app.session.load(containerName,
+    function (err, rawContainer) {
+      if (err) {
+        console.error(err);
+        // check if we need to create the container
+        if (err == 'Key does not exist') {
+          // create new container
+          app.session.create(containerName, function (err, rawContainer) {
+            if (err) {
+              var _err = 'Cannot create container: ' + err;
+              console.error(_err);
+              return app.alert(_err, 'danger');
+            }
+            // We have a new container
+            return rawContainer;
+          });
+        }
+      } else {
+        // XXXddahl: stop indeterminate progressbar??
+        return rawContainer;
+      }
+    });
+  },
+
+  displayMessage: function (container) {
+    // we have a raw container
+
   }
 };
