@@ -28,7 +28,7 @@ var app = {
     this.bindEvents();
   },
 
-  APPNAME: 'User Verifier',
+  APPNAME: 'CryptonMessenger',
 
   URL: 'https://crypton.io',
 
@@ -121,6 +121,11 @@ var app = {
       $('.contact-id').remove();
       $('#contact-details').hide();
       $('#contacts').show();
+    });
+
+    $('#compose-send-btn').click(function () {
+      console.log('send!!');
+
     });
 
     $('#find-someone').keyup(
@@ -327,6 +332,8 @@ var app = {
       $("#top-menu").show();
       $(".main-btn").show();
       app.session = session;
+      // start message listener
+      app.inboxListener();
       $('#login-progress').hide();
       $('#login-buttons').show();
     }
@@ -446,6 +453,8 @@ var app = {
     $(canvas).css({ width: '300px'});
     $('#peer-fingerprint-id').append(canvas);
   },
+
+  // XXXddahl: We need to cache the user's ID Card with photo for the session
 
   displayMyFingerprint: function (withPhoto) {
     function displayIdCard(idCard) {
@@ -604,16 +613,29 @@ var app = {
                    + name
                    + '</li>';
         $('#contacts-list').append($(html));
-        var id = '#contact-' + name;
+        // var _btn = '<button id="compose-"' + name + '-btn">Send</button>';
+        // var btn = $('#contacts-' + name).prepend($(_btn));
+
+        var id = '#contact-' + name; // XXXddahl: need an inner node for click event
         $(id).click(function () {
           app.contactDetails(name);
+          // set the message button event handler inside this one...
+          $('#contacts-detail-message-btn').click(function () {
+            app.showComposeUI(name);
+          });
         });
+
+        // var composeId = '#compose-' + name + '-btn';
+        // console.log($(composeId));
+        // $(composeId).click(function () {
+        //   app.showComposeUI(name);
+        // });
       }
     });
   },
 
   contactDetails: function (name) {
-    $('#contact-id').remove();
+    $('.contact-id').remove();
     var contact = app._contacts[name];
     // display the contact's fingerprint ID card:
     var canvas = app.utils.createIdCard(contact.fingerprint,
@@ -638,36 +660,228 @@ var app = {
     });
   },
 
-  createOrOpenMessage: function (username) {
-    // see if we already have a message container for this user:
-    // XXXddahl: start indeterminate progressbar??
-    var containerName = '_message_' + username;
-    app.session.load(containerName,
-    function (err, rawContainer) {
-      if (err) {
-        console.error(err);
-        // check if we need to create the container
-        if (err == 'Key does not exist') {
-          // create new container
-          app.session.create(containerName, function (err, rawContainer) {
-            if (err) {
-              var _err = 'Cannot create container: ' + err;
-              console.error(_err);
-              return app.alert(_err, 'danger');
-            }
-            // We have a new container
-            return rawContainer;
-          });
-        }
-      } else {
-        // XXXddahl: stop indeterminate progressbar??
-        return rawContainer;
-      }
+  inboxListener: function () {
+    app.session.on('message', function (message) {
+      console.log('message arrived');
+      console.log(message);
+      app.handleMessage(message);
     });
   },
 
-  displayMessage: function (container) {
-    // we have a raw container
+  handleMessage: function (message) {
+    console.log('handleMessage()');
+    if (message.headers.action == 'containerShare') {
+      // make sure the sender is in our whitelist
+      var from = message.payload.fromUsername;
+      console.log(from);
+      app.getContactsFromServer(function (err, contacts) {
+        // this checks for a cached container
+        // XXXddahl: need to refresh from server every X minutes...
+        console.log(contacts);
+        if (err) {
+          console.error(err);
+          return app.alert(err, 'danger');
+        }
+        if (contacts[from]) {
+          console.log(contacts[from]);
+          // we have a verified, trusted user here
+          // load the peer object...
+          app.session.getPeer(from, function (err, peer) {
+            if (err) {
+              return app.alert('Cannot load peer from server', 'danger');
+            }
+            // let's load the new container!
+            var hmac = message.payload.containerNameHmac;
+            console.log(hmac);
+            app.session.loadWithHmac(hmac, peer,
+              function (err, msgContainer) {
+                if (err) {
+                  return app.alert('Cannot load message container', 'danger');
+                }
+                console.log(msgContainer);
+                // save to archived message conatiner...
+                app.session.load('archived_messages',
+                function (err, archContainer) {
+                  if (err) {
+                    return app.alert('Cannot load archived messages');
+                  }
+                  console.log(archContainer);
+                  if (!archContainer.keys['archived_messages']) {
+                    archContainer.keys['archived_messages'] = {};
+                  }
+                  var msg = {
+                    from: from,
+                    to: msgContainer.keys['recipient'],
+                    content: msgContainer.keys['content'],
+                    subject: msgContainer.keys['subject'],
+                    sent: msgContainer.keys['sent'],
+                    hmac: hmac
+                  };
+                  archContainer.keys['archived_messages'][hmac] = msg;
+                  // list message
+                  console.log('listing message');
+                  console.log(msg);
+                  app.listMessage(msg);
+                  console.log('notifying of new message');
+                  app.notifyMessageArrival(msg);
+                });
+              });
+          });
+        } else {
+          // Message was sent by a contact we don't know about or trust
+          console.error('Container shared by untrusted peer, ignoring.');
+          // XXXddahl: delete the message!
+        }
+      });
+    }
+  },
 
+  listMessage: function (message) {
+    // Add this message to the message list
+    var html = '<li>'
+               + message.subject
+             + '</li>';
+    $('#message-list').prepend($(html));
+    app.notifyMessageArrival(message);
+  },
+
+  notifyMessageArrival: function (message) {
+    var dismiss = function () {
+      // open the message
+      console.log('display message');
+      console.log(window);
+    }
+    // Use notification API to buzz + notify mobile user
+    navigator.notification.alert(
+      'A message arrived from ' + message.from,
+      dismiss,
+      'New Message',
+      'Read'
+    );
+  },
+
+  archived_messages: null,
+
+  message_index: null,
+
+  send: function () {
+    console.log('send()');
+    // assemble the message object
+    var recipient = $('#compose-recipient').val();
+    var subject = $('#compose-subject').val();
+    var content = $('#compose-content').val();
+    if (!recipient || !subject || !content) {
+      return app.alert('Cannot send a message without subject or message', 'danger');
+    }
+    var message = {
+      recipient: recipient,
+      subject: subject,
+      content: content,
+      sent: Date.now()
+    };
+
+    app.sendMessage(message, function (err) {
+      console.log('sendMessage callback...')
+      if (err) {
+        console.error(err);
+        return app.alert(err, 'danger');
+      }
+      app.cleanupNewMessage();
+      app.alert('Message Sent!');
+    });
+  },
+
+  sendMessage: function (message, callback) {
+    console.log('sendMessage()');
+    console.log(message);
+    // create a new container and share it with message.recipient peer
+    if (!message.content) {
+      return app.alert('Message content required!');
+    }
+    if (!message.recipient) {
+      return app.alert('Message recipient required!');
+    }
+
+    // create a new conatainer for the new message
+    app.loadOrCreateContainer('message_index',
+      function (err, rawContainer) {
+        console.log('loading message index...');
+        if (err) {
+          console.error('message index failed to load...');
+          return callback(err);
+        }
+        app.message_index = rawContainer; // store message metadata here
+        // Get peer
+        console.log('getting peer...');
+        app.session.getPeer(message.recipient, function(err, peer) {
+          console.log('getting peer callback');
+          if (err) {
+            console.error(err);
+             return app.alert(err, 'danger');
+          }
+          // We have a peer
+          if (!peer.trusted) {
+            console.error('peer is not trusted');
+            return app.alert('Cannot send a message to untrusted peer', 'danger');
+          }
+          // create a message container
+          var now = Date.now();
+          var msgContainerName = peer.username + '-' + now;
+          console.log('load or create msg container');
+          app.loadOrCreateContainer(msgContainerName,
+            function (err, msgContainer) {
+              if (err) {
+                console.error(err);
+                return app.alert(err, 'danger');
+              }
+              var msg = msgContainer;
+              message.created = now;
+              msg.keys.message = message;
+              // let's share this container!
+              console.log('sharing message!');
+              msg.share(peer, function (err) {
+                if (err) {
+                  console.error(err);
+                  return app.alert(err);
+                }
+                console.log('shared message container...');
+                console.log(msg);
+                // We have shared the message container
+                // keep a record in the index
+                app.message_index.keys[msgContainerName] = message;
+                app.cleanupNewMessage(true);
+              });
+            });
+        });
+      });
+  },
+
+  showComposeUI: function (recipient) {
+    $('.view').hide();
+    $('#compose-recipient').val(recipient);
+    $('#compose-message').show();
+    $('#compose-subject').focus();
+    $('#compose-send-btn').click(function () {
+      app.send();
+    });
+  },
+
+  cleanupNewMessage: function (wasSent) {
+    // clean up, reset and hide message UI
+    $('.view').hide();
+    $('#compose-message').hide();
+    $('.main-btn').show();
   }
 };
+
+// XXXddahl:
+// Thoughts on messaging:
+// each message is a unique container.
+// Create container, assign recipient(s), share container
+// Listen for 'containershared' event, use 'notify' api to tell user
+//   of new message(s)
+// Message consists of subject and a 4K block of
+//   text (pre-encryption) + 1 file up to 500K ??
+// Login function needs to call 'check Inbox()'
+//   shorlty after logging in.
+// We must page the inbox

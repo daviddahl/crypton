@@ -164,3 +164,7 @@ h1 {
     font-size: 1.5em;
     border-bottom: 1px solid #ccc;
 }
+
+#compose-message {
+    height: 8em;
+}

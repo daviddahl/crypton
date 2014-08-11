@@ -41,6 +41,20 @@ module.exports = [
         "clobbers": [
             "window.plugins.socialsharing"
         ]
+    },
+    {
+        "file": "plugins/org.apache.cordova.dialogs/www/notification.js",
+        "id": "org.apache.cordova.dialogs.notification",
+        "merges": [
+            "navigator.notification"
+        ]
+    },
+    {
+        "file": "plugins/org.apache.cordova.dialogs/www/android/notification.js",
+        "id": "org.apache.cordova.dialogs.notification_android",
+        "merges": [
+            "navigator.notification"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -48,7 +62,8 @@ module.exports.metadata =
 {
     "com.phonegap.plugins.barcodescanner": "1.1.0",
     "org.apache.cordova.camera": "0.3.0",
-    "nl.x-services.plugins.socialsharing": "4.3.0"
+    "nl.x-services.plugins.socialsharing": "4.3.0",
+    "org.apache.cordova.dialogs": "0.2.8"
 }
 // BOTTOM OF METADATA
 });

@@ -93,6 +93,7 @@
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/css/fonts/glyphicons-halflings-regular.svg \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/css/fonts/glyphicons-halflings-regular.woff \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.camera \
+/home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.dialogs \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/com.phonegap.plugins.barcodescanner \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/nl.x-services.plugins.socialsharing \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.camera/www \
@@ -100,6 +101,10 @@
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.camera/www/Camera.js \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.camera/www/CameraPopoverOptions.js \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.camera/www/CameraConstants.js \
+/home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.dialogs/www \
+/home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.dialogs/www/notification.js \
+/home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.dialogs/www/android \
+/home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/org.apache.cordova.dialogs/www/android/notification.js \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/com.phonegap.plugins.barcodescanner/www \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/com.phonegap.plugins.barcodescanner/www/barcodescanner.js \
 /home/ddahl/code/spideroak/daviddahl/crypton/client/examples/mobile-verify/platforms/android/assets/www/plugins/nl.x-services.plugins.socialsharing/www \

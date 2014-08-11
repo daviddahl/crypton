@@ -79,6 +79,11 @@
 	  </li>
 	</ul>
 
+	<div id="message-list" class="view">
+	  <ul class="nav nav-pills nav-stacked">
+	  </ul>
+	</div>
+
 	<div id="find-users-view" class="view">
 	  <div id="find-user-form" class="input-group input-group-lg">
 	    <input id="find-someone" 
@@ -146,17 +151,50 @@
 	</div>
 
 	<div id="contact-details" class="view">
-	  <button type="button"
-		  class="btn"
-		  id="contacts-detail-dismiss-btn">
-	    Done
-	  </button>
+	  
+	  <div id="contact-details-buttons" 
+	       class="btn-group btn-group-lg">
+	    <button type="button"
+		    class="btn btn-default"
+		    id="contacts-detail-message-btn">Message</button>
+	    <button type="button"
+		    class="btn btn-default"
+		    id="contacts-detail-dismiss-btn">Done</button>
+	  </div>
 	</div>
 
 	<div id="my-fingerprint-id" class="view">
 	</div>
 
 	<div id="peer-fingerprint-id" class="view">
+	</div>
+
+	<div id="compose-message" class="view">
+	  <div id="compose-form" class="input-group input-group-lg">
+	    <input placeholder="To"
+		   size="20"
+		   maxlength="64"
+		   class="form-control" 
+		   id="compose-recipient" type="text" 
+		   disabled="true"/>
+	    <input placeholder="Subject"
+		   size="20"
+		   maxlength="128"
+		   class="form-control" 
+		   id="compose-subject" type="text" />
+	    <textarea placeholder="Write message here" 
+		   maxlength="4096"
+		   class="form-control"
+		   id="compose-content"></textarea>
+	    <div class="btn-group btn-group-lg">
+	      <button type="button" 
+		      class="btn btn-default"
+		      id="compose-send-btn">Send</button> 
+	      <button type="button"
+		      class="btn btn-default"
+		      id="compose-cancel">Cancel</button>
+	    </div>
+	  </div>
 	</div>
 
 	<div id="images" class="view">
