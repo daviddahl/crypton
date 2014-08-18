@@ -1,0 +1,359 @@
+* {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-touch-callout: none;
+  touch-callout: none;
+  -webkit-text-size-adjust: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  tap-highlight-color: rgba(0,0,0,0);
+}
+
+body {
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-size: 100%;
+  margin:0px;
+  padding:0px;
+  color: #222;
+  background-color: #000;
+}
+
+.app {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.page {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.darkener {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0,0,0,0.4);
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.2s ease-in;
+  -webkit-transition: all 0.2s ease-in;
+  z-index: 15;
+}
+
+.app.opensidemenu .darkener {
+  visibility: visible;
+  opacity: 1;
+}
+
+.nav {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 56px;
+  background-color: #607d8b ;
+  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.16), 0 1px 2.5px 0 rgba(0, 0, 0, 0.26);
+  z-index: 10;
+}
+
+.nav h1 {
+  position: absolute;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  right: 56px;
+  left: 72px;
+  height: 56px;
+  color: #fff;
+  font-size: 130%;
+  font-weight: 100;
+  line-height: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav h1 i {
+  font-size: 90%;
+}
+
+.nav h1 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav h1 small {
+  font-size: 60%;
+  margin: 0 0 0 10px;
+}
+
+.nav .button {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 100%;
+  color: #cfd8dc ;
+  font-weight:100;
+  border-radius: 40px;
+  text-align: center;
+  margin: 8px;
+  overflow: hidden;
+}
+
+.nav .button.left {
+  left: 0;
+}
+
+.nav .button.right {
+  right: 0;
+  text-align: right;
+}
+
+.nav .button:active, .nav .button.active {
+  background-color: #78909c;
+}
+
+.content {
+  position: absolute;
+  top: 56px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  background-color: #cfd8dc ;
+  padding: 5px 0 0 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sidemenu {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 56px;
+  background-color: #fff;
+  color: #333;
+  z-index: 20;
+  padding: 0;
+  margin: 0;
+  transition: all 0.2s ease-out;
+  -webkit-transition: all 0.2s ease-out;
+  transform: translate(-100%,0);
+  -webkit-transform: translate(-100%,0);
+}
+
+.sidemenu * {
+  /* border: 1px solid red; */
+}
+
+.sidemenu ul {
+  padding: 8px 0;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-width: 0 0 1px 0;
+}
+
+.sidemenu ul li {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  list-style-type: none;
+  margin: 0;
+  height: 48px;
+  padding: 0;
+  line-height: 48px;
+  color: #666;
+}
+
+.sidemenu ul li i.fa {
+  font-size: 120%;
+  line-height: 48px;
+  position: absolute;
+  left: 16px;
+}
+
+.sidemenu ul li span {
+  position: absolute;
+  left: 72px;
+  font-size: 90%;
+}
+
+.sidemenu ul li a {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  height: 48px;
+}
+
+.sidemenu ul li a:active,
+.sidemenu ul li a.active {
+  background-color: #eceff1;
+}
+
+.headerimage {
+  margin: 0;
+  padding: 16px;
+  width: 100%;
+  height: 172px;
+  background-color: #eceff1;
+}
+
+.myavatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 72px;
+  background-color: #37474f;
+  margin: 0;
+  padding: 0;
+}
+
+.myavatar:before {
+  position: absolute;
+  content: "";
+  color: #fff;
+  width: 72px;
+  height: 72px;
+  line-height: 72px;
+  text-align: center;
+  font-size: 30px;
+}
+
+.app.opensidemenu .sidemenu {
+  transform: translate(0,0);
+  -webkit-transform: translate(0,0);
+}
+
+.button a {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+}
+
+p, h2, h3 {
+  padding: 10px;
+  margin: 0;
+}
+
+h2 {
+  font-size: 120%;
+}
+
+h3 {
+  font-size: 100%;
+}
+
+.fab {
+  border-radius: 50%;
+  position: absolute;
+  /*top: 20px;*/
+  bottom: 16px;
+  right: 16px;
+  background-color: #37474f;
+  color: #d0d9ff;
+  font-size: 24px;
+  width: 56px;
+  height: 56px;
+  line-height: 56px;
+  text-align: center;
+  font-size: 24px;
+  /* z level 2 */
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26), 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+  transition: all 0.1s ease-in;
+  -webkit-transition: all 0.1s ease-in-out;
+  transition-property: transform, box-shadow, bottom;
+  -webkit-transition-property: -webkit-transform, box-shadow, bottom;
+}
+
+.fab:active,
+.fab.active {
+  /* z level 3 */
+  box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: #455a64;
+}
+
+.login {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #455a64;
+  transition: all 0.05s ease-in;
+  -webkit-transition: all 0.05s ease-in;
+}
+
+::-webkit-input-placeholder {
+  color: #cfd8dc;
+}
+
+.login.dismissed {
+  -webkit-transform: translate(0,100%);
+  transform: translate(0,100%);
+}
+
+.login h2 {
+  color: #fff;
+  text-align: center;
+  margin: 20px 0;
+  letter-spacing: 2px;
+}
+
+.login form {
+  display: block;
+  width: 270px;
+  margin: 0 auto;
+}
+
+.login input {
+  border-radius: 0;
+  width: 100%;
+  padding: 10px;
+  font-size: 100%;
+  outline: none;
+  border: none;
+  color: #fff;
+  background-color: #455a64 ;
+  border-bottom: 1px solid #cfd8dc;
+}
+
+.login button {
+  outline: none;
+  border: 1px solid #cfd8dc;
+  border-radius: 2px;
+  background-color: rgba(0,0,0,0);
+  margin: 20px 0;
+  padding: 10px;
+  font-size: 100%;
+  color: #eceff1;
+  transition: all 0.05s ease-in;
+  -webkit-transition: all 0.05s ease-in;
+}
+
+.login button:active {
+  background-color: #546e7a;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26), 0 2px 10px 0 rgba(0, 0, 0, 0.16);
+}
+
+.login button.create {
+  width: 64%;
+}
+
+.login button.submit {
+  width: 34%;
+}
+

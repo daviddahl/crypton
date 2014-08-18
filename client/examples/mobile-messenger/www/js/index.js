@@ -17,6 +17,11 @@
  * under the License.
  */
 
+
+window.addEventListener('load', function() {
+  FastClick.attach(document.body);
+}, false);
+
 var app = {
   // Application Constructor
   initialize: function() {
@@ -63,6 +68,33 @@ var app = {
         }
       }
     }
+
+    // Begin new UI events
+    $('.sidemenu ul li a, .darkener').on('click', function(e) {
+      e.preventDefault();
+      $('.app').removeClass('opensidemenu');
+    });
+
+    $('.nav .button.menu').on('click', function(e) {
+      e.preventDefault();
+      $('.app').addClass('opensidemenu');
+    });
+
+    $('.fab').on('click', function(e) {
+      e.preventDefault();
+    });
+
+    // $('.login button').on('click', function(e) {
+    //   e.preventDefault();
+    //   $('.login').addClass('dismissed');
+    // });
+
+    // $('.login form').on('submit', function(e) {
+    //   e.preventDefault();
+    //   $('.login').addClass('dismissed');
+    // });
+    // end new UI events
+
 
     $('#scan').click(function () {
       app.scanQRCode();
@@ -192,14 +224,15 @@ var app = {
 
   logout: function () {
     app.session = null;
-    $('.view').hide();
-    $('.main-btn').hide();
-    $('#tasks-btn').hide();
-    $('#account-name-label').hide();
-    $('#account-name').html("");
+    // $('.view').hide();
+    // $('.main-btn').hide();
+    // $('#tasks-btn').hide();
+    // $('#account-name-label').hide();
+    // $('#account-name').html("");
     $('#account-login').show();
     $('#login-buttons').show();
     $('#password-login').val("");
+    $('.app').removeClass('opensidemenu');
     app.alert("You are logged out", 'info');
   },
 
@@ -327,16 +360,19 @@ var app = {
         $('#login-buttons').show();
         return;
       }
-      $('.view').hide();
-      $('#tasks-btn').show();
+      // $('.view').hide();
+      $('#account-login').hide(); //addClass('dismissed');
+      //$('#tasks-btn').show();
       $('#account-name').text(user);
-      $('#account-name-label').show();
+      var myInitial = user[0];
+      $('.my-avatar').css({content: myInitial });
+      // $('#account-name-label').show();
       app.username = user;
-      $("#top-menu").show();
-      $(".main-btn").show();
+      // $("#top-menu").show();
+      // $(".main-btn").show();
       app.session = session;
-      $('#login-progress').hide();
-      $('#login-buttons').show();
+      // $('#login-progress').hide();
+      // $('#login-buttons').show();
     }
 
     crypton.authorize(user, pass, function (err, session) {
