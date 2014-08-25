@@ -28,7 +28,12 @@
  * var  = new crypton.Card();
  * ````
  */
-var Card = crypton.Card = function Card () {};
+var Card = crypton.Card = function Card (session) {
+  if (!session) {
+    throw new Error('session is required to construct a Card object');
+  }
+  this.session = session;
+};
 
 /**!
  * ### createIdCard(fingerprint, username, appname, domId)
@@ -121,7 +126,7 @@ Card.prototype.createIdCard =
 Card.prototype.createQRCode = function (fingerArr, username, appname, url) {
 
   // generate QRCode
-  var qrData = this.generateQRCodeInput(fingerArr.join(" "), username, appname, url);
+  var qrData = this.generateQRCodeInput(fingerArr, username, appname, url);
   var qrCanvas = document.createElement('canvas');
   qrCanvas.width = 200;
   qrCanvas.height = 200;
@@ -234,14 +239,41 @@ Card.prototype.createFingerprintArr = function (fingerprint) {
  *
  * @param {String} fingerprint
  */
-Card.prototype.generateQRCodeInput = function (fingerprint, username, application, url) {
+Card.prototype.generateQRCodeInput = function (fingerArr, username, application, url) {
   if (!url) {
     url = '';
   }
-  var json = JSON.stringify({ fingerprint: fingerprint, username: username,
-                              application: application, url: url });
+  var fingerprint = fingerArr.join(' ');
+  var fingerhash = fingerArr.join('').toLowerCase();
+  // Sign the fingerprint
+  var signature = this.createSignature(fingerprint);
+
+  if (signature.error) {
+    throw new Error(signature.error);
+  }
+
+  var json = JSON.stringify({ fingerprint: fingerprint,
+                              fingerhash: fingerhash,
+                              username: username,
+                              application: application,
+                              url: url,
+                              signature: signature });
   return json;
 };
 
+Card.prototype.createSignature = function (fingerprintHash) {
+  if (!fingerprintHash) {
+    throw new Error('fingerprintHash is required to create a signature');
+  }
+
+  try {
+    var signature =
+    this.session.account.signKeyPrivate.sign(fingerprintHash, crypton.paranoia);
+    return { signature: signature, error: null };
+  } catch (ex) {
+    var err = "Error: Could not complete signature: " + ex;
+    return { signature: null, error: err };
+  }
+};
 
 }());

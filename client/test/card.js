@@ -17,10 +17,17 @@
 */
 
 describe('Card', function () {
-  var card = new crypton.Card();
-  var username = 'drzhivago';
+  var account = setupAccount();
+  var sessionIdentifier = 'dummySession';
+  var session = new crypton.Session(sessionIdentifier);
+  session.account = account;
+  console.log('Session:');
+  console.log(session);
+  var card = new crypton.Card(session);
+  var username = session.account.username;
   var appname = 'noneofyourfingbizness';
-  var fingerprint = 'fbc42d5f1dc4e42b3b02338eef5364670461f4bb02b80b66263407011619d092';
+  session.account.fingerprint = 'fbc42d5f1dc4e42b3b02338eef5364670461f4bb02b80b66263407011619d092';
+  var fingerprint = session.account.fingerprint;
   var url = 'https://crypton.io';
 
   // helper functions //////////////////////////////////////////////////////
@@ -64,6 +71,33 @@ describe('Card', function () {
       assert.equal(arr.length, 16);
       assert.equal(arr[0].length, 7);
       assert.equal(arr[0][0], '#');
+      done();
+    });
+  });
+
+  describe('generateQRCodeInput()', function () {
+    it('should generate corerct input for the QR Code', function (done) {
+      var fingerArr = card.createFingerprintArr(fingerprint);
+      var qrCodeInput = card.generateQRCodeInput(fingerArr, username, appname, url);
+      var inputObj = JSON.parse(qrCodeInput);
+      assert.equal(inputObj.fingerhash, fingerprint);
+      assert(!inputObj.signature.error);
+      assert.equal(inputObj.fingerprint, fingerArr.join(' '));
+      assert(inputObj.signature.signature);
+      assert.equal(inputObj.application, appname);
+      assert.equal(inputObj.url, url);
+
+      done();
+    });
+  });
+
+  describe('createSignature()', function () {
+    it('should generate a signature', function (done) {
+      var signature = card.createSignature(fingerprint);
+
+      assert(!signature.error);
+      assert(signature.signature);
+
       done();
     });
   });
