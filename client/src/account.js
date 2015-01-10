@@ -77,8 +77,11 @@ Account.prototype.unravel = function (callback) {
   });
 };
 
+// move regenerateKeys to sjcl-module.js
+//  & publicly call this from crypton.crypto.regenerateKeys(data, callback)
+
 /**!
- * ### regenerateKeys(callback)
+ * ### regenerateKeys(data, callback)
  * Reconstruct keys from unraveled data
  *
  * Calls back without error if successful

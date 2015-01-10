@@ -64,6 +64,8 @@ crypton.host = location.hostname;
  */
 crypton.port = 1025;
 
+// Move cipherOptions to sjcl-module.js
+
 /**!
  * ### cipherOptions
  * Sets AES mode to GCM, necessary for SJCL
@@ -71,6 +73,8 @@ crypton.port = 1025;
 crypton.cipherOptions = {
   mode: 'gcm'
 };
+
+// MOve paranoia to sjcl-module.js
 
 /**!
  * ### paranoia
@@ -84,11 +88,15 @@ crypton.paranoia = 6;
  */
 crypton.trustStateContainer = '_trust_state';
 
+// move collectors started to sjcl-module.js
+
 /**!
  * ### collectorsStarted
  * Internal flag to know if startCollectors has been called
  */
 crypton.collectorsStarted = false;
+
+// move startCollectors to sjcl-module.js
 
 /**!
  * ### startCollectors
@@ -108,6 +116,9 @@ crypton.startCollectors = function () {
 crypton.url = function () {
   return 'https://' + crypton.host + ':' + crypton.port;
 };
+
+
+// move randomBytes to sjcl-module.js
 
 /**!
  * ### randomBytes(nbytes)
@@ -139,6 +150,8 @@ function randomBytes (nbytes) {
 }
 crypton.randomBytes = randomBytes;
 
+// constEqual should move to crypto.js as we can override this one with nacl's etc...
+
 /**!
  * ### constEqual()
  * Compare two strings in constant time.
@@ -166,6 +179,8 @@ function constEqual (str1, str2) {
   return mismatch === 0;
 }
 crypton.constEqual = constEqual;
+
+// move randomebits to sjcl-module.js
 
 /**!
  * ### randomBits(nbits)
@@ -195,6 +210,7 @@ crypton.randomBits = function (nbits) {
   return crypton.randomBytes(nbytes);
 };
 
+// move to sjcl-module.js
 /**!
  * ### mac(key, data)
  * Generate an HMAC using `key` for `data`.
@@ -208,6 +224,7 @@ crypton.hmac = function(key, data) {
   return sjcl.codec.hex.fromBits(mac.mac(data));
 }
 
+// move to the crypto.js module
 /**!
  * ### macAndCompare(key, data, otherMac)
  * Generate an HMAC using `key` for `data` and compare it in
@@ -223,6 +240,7 @@ crypton.hmacAndCompare = function(key, data, otherMac) {
   return crypton.constEqual(ourMac, otherMac);
 };
 
+// move to sjcl, will need a crypto.fingerprint() as well
 /**!
  * ### fingerprint(pubKey, signKeyPub)
  * Generate a fingerprint for an account or peer.
@@ -275,14 +293,17 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
         return callback('Must supply username and passphrase');
       }
 
+      // XXXddahl: This should be removed / added to sjcl module and init'd on start
       if (!crypton.collectorsStarted) {
         crypton.startCollectors();
       }
-
+      // move to sjcl module
       var SIGN_KEY_BIT_LENGTH = 384;
+      // move to sjcl module
       var keypairCurve = options.keypairCurve || 384;
 
       var account = new crypton.Account();
+      // XXXddahl: all keygen must move to the sjcl-module.js
       var hmacKey = randomBytes(32);
       var keypairSalt = randomBytes(32);
       var keypairMacSalt = randomBytes(32);
@@ -294,10 +315,13 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
       var keypair = sjcl.ecc.elGamal.generateKeys(keypairCurve, crypton.paranoia);
       var signingKeys = sjcl.ecc.ecdsa.generateKeys(SIGN_KEY_BIT_LENGTH, crypton.paranoia);
 
+      // XXXddahl: Leave SRP alone for now...
       var srp = new SRPClient(username, passphrase, 2048, 'sha-256');
       var srpSalt = srp.randomHexSalt();
       var srpVerifier = srp.calculateV(srpSalt).toString(16);
 
+      // XXXddahl: need to work the generateAllAccountKeys function here
+      // XXXddahl: stringify these in _sjcl module
       account.username = username;
       account.keypairSalt = JSON.stringify(keypairSalt);
       account.keypairMacSalt = JSON.stringify(keypairMacSalt);
@@ -308,6 +332,7 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
       account.srpVerifier = srp.nZeros(512 - srpVerifier.length) + srpVerifier;
       account.srpSalt = srpSalt;
 
+      // XXXddahl: these are stringified in _sjcl module
       // pubkeys
       account.pubKey = JSON.stringify(keypair.pub.serialize());
       account.signKeyPub = JSON.stringify(signingKeys.pub.serialize());
@@ -315,14 +340,19 @@ crypton.generateAccount = function (username, passphrase, callback, options) {
       var sessionIdentifier = 'dummySession';
       var session = new crypton.Session(sessionIdentifier);
       session.account = account;
+      // XXXddahl: This should be set in _sjcl
       session.account.signKeyPrivate = signingKeys.sec;
 
       var selfPeer = new crypton.Peer({
         session: session,
+        // XXXddahl: keypair.pub might just be a convention for the crypto module?
+        // as in: crypton.crypto.keypair.pub ?
         pubKey: keypair.pub
       });
       selfPeer.trusted = true;
 
+      // XXXddahl: We need to move all of this to, e.g.: crypto.wrapAllAccountKeys()
+      // XXXddahl: need to figure out encryptAndSign changes
       // hmac keys
       var encryptedHmacKey = selfPeer.encryptAndSign(JSON.stringify(hmacKey));
       if (encryptedHmacKey.error) {
@@ -439,6 +469,7 @@ crypton.authorize = function (username, passphrase, callback, options) {
                 return;
               }
 
+              // XXXddahl: need top reference crypton.crypto.constEqual here
               if (!constEqual(res.body.srpM2, ourSrpM2)) {
                 callback('Server could not be verified');
                 return;
