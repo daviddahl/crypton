@@ -240,7 +240,10 @@ work.decryptRecord = function (options, callback) {
   var record;
   try {
     record = JSON.parse(options.record);
-  } catch (e) {}
+  } catch (e) {
+    // XXXddahl: Not sure why we do this here if we already do it in Container.decryptRecord
+    console.error(e);
+  }
 
   if (!record) {
     return callback('Could not parse record');
@@ -256,14 +259,17 @@ work.decryptRecord = function (options, callback) {
   var verified = false;
   var payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(record.ciphertext));
 
-  try {
-    verified = peerSignKeyPub.verify(payloadCiphertextHash, record.signature);
-  } catch (e) {
-    console.log(e);
-  }
+  if (record.recordIndex == (record.recordCount + 1)) {
+    // This is the last record, verify the signature. We should avoid verifying all signatures.
+    try {
+      verified = peerSignKeyPub.verify(payloadCiphertextHash, record.signature);
+    } catch (e) {
+      console.log(e);
+    }
 
-  if (!verified) {
-    return callback('Record signature does not match expected signature');
+    if (!verified) {
+      return callback('Record signature does not match expected signature');
+    }
   }
 
   var payload;

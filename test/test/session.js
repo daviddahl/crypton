@@ -69,6 +69,7 @@ describe('Session functionality', function () {
           'versions',
           'version',
           'name',
+          'mostRecentCiphertextPayload',
           'nameHmac',
           'sessionKey'
         ];
