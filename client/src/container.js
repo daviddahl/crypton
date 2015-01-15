@@ -38,6 +38,7 @@ var Container = crypton.Container = function (session) {
   //this.version = +new Date();
   this.version = 0;
   this.name = null;
+  this.mostRecentCiphertextPayload = null;
 };
 
 /**!
@@ -47,7 +48,7 @@ var Container = crypton.Container = function (session) {
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {String} key
  * @param {Function} callback
  */
@@ -68,7 +69,7 @@ Container.prototype.add = function (key, callback) {
  * Calls back with `value` and without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {String} key
  * @param {Function} callback
  */
@@ -89,7 +90,7 @@ Container.prototype.get = function (key, callback) {
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Function} callback
  * @param {Object} options (optional)
  */
@@ -113,7 +114,33 @@ Container.prototype.save = function (callback, options) {
     that.recordCount++;
 
     var rawPayloadCiphertext = sjcl.encrypt(that.sessionKey, JSON.stringify(payload), crypton.cipherOptions);
-    var payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(rawPayloadCiphertext));
+    // var payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(rawPayloadCiphertext));
+    // XXXddahl:
+    // Do we have access to the previous record?
+    // We need to sign(hash(record N, record M))
+    // Sign the concatenation of the previous record and this record
+    // Save as the 'payload signature'
+    // Now we just verify the final record
+    // HOW TO GET PREVIOUS "VERSION"
+
+    var versionIdxArr = Object.keys(that.versions);
+    var versionCount = versionIdxArr.length;
+    var payloadCiphertextHash;
+
+    if (versionCount == 1) {
+      // This is the first save() called
+      // we hash + sign this record only
+      payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(rawPayloadCiphertext));
+    } else if (versionCount > 1) {
+      // Get previous version to hash with this version
+      var concatenatedCiphertext = rawPayloadCiphertext + that.mostRecentCiphertextPayload;
+      payloadCiphertextHash = sjcl.hash.sha256.hash(JSON.stringify(concatenatedCiphertext));
+      that.mostRecentCiphertextPayload = rawPayloadCiphertext;
+    } else {
+      // Zero length version count?
+      return callback('Cannot save, zero length version count encountered!');
+    }
+
     var payloadSignature = that.session.account.signKeyPrivate.sign(payloadCiphertextHash, crypton.paranoia);
 
     var payloadCiphertext = {
@@ -152,7 +179,7 @@ Container.prototype.save = function (callback, options) {
  * Calls back with diff object and without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Function} callback
  */
 Container.prototype.getDiff = function (callback) {
@@ -222,7 +249,7 @@ Container.prototype.getPublicName = function () {
  * Calls back with diff object and without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Function} callback
  */
 Container.prototype.getHistory = function (callback) {
@@ -252,7 +279,7 @@ Container.prototype.getHistory = function (callback) {
  * and without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Array} records
  * @param {Function} callback
  */
@@ -279,9 +306,8 @@ Container.prototype.parseHistory = function (records, callback) {
     });
   }, function (err) {
     if (err) {
-      console.log('Hit error parsing container history');
+      console.error('Hit error parsing container history: ', err);
       console.log(that);
-      console.log(err);
 
       return callback(err);
     }
@@ -313,6 +339,7 @@ Container.prototype.decryptRecord = function (recordIndex, record, callback) {
   var parsedRecord;
   try {
     parsedRecord = JSON.parse(record.payloadCiphertext);
+    this.mostRecentCiphertextPayload = parsedRecord;
   } catch (e) {}
 
   if (!parsedRecord) {
@@ -365,7 +392,7 @@ Container.prototype.decryptKey = function (record) {
  * Calls back without error if successful
  *
  * Calls back with error if unsuccessful
- * 
+ *
  * @param {Function} callback
  */
 Container.prototype.sync = function (callback) {
@@ -377,13 +404,15 @@ Container.prototype.sync = function (callback) {
     }
 
     that.parseHistory(records, function (err, keys, versions, recordIndexAfter) {
+      var versionIdxArr = Object.keys(versions);
       that.keys = keys;
       that.versions = versions;
-      that.version = Math.max.apply(Math, Object.keys(versions));
-      that.recordCount = that.recordCount + versions.count;
+      that.version = Math.max.apply(Math, versionIdxArr);
+      // that.recordCount = that.recordCount + versions.count; <-- GAH!!!!!
+      that.recordCount = that.recordCount + versionIdxArr.length;
 
       // TODO verify recordIndexAfter == recordCount?
-
+      console.log(err, keys, versions, recordIndexAfter, that.recordCount);
       callback(err);
     });
   });
@@ -481,4 +510,3 @@ Container.prototype.unwatch = function () {
 };
 
 })();
-

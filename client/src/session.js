@@ -95,6 +95,7 @@ Session.prototype.load = function (containerName, callback) {
   var that = this;
   this.getContainer(containerName, function (err, container) {
     if (err) {
+      console.error(err);
       callback(err);
       return;
     }
@@ -392,4 +393,3 @@ Session.prototype.emit = function (eventName, data) {
 };
 
 })();
-
